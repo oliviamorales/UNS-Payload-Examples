@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/count.json",
+  "title": "Count Schema",
+  "description": "Schema for count information",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the count was recorded (ISO 8601)"
+    },
+    "value": {
+      "type": "number",
+      "minimum": 0,
+      "description": "The count quantity (must be >= 0)"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure (e.g., units, kg)"
+    },
+    "type": {
+      "type": "object",
+      "required": ["id", "name", "description"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Count type identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Count type name (e.g., Infeed, Waste)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Count type description"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system or service that generated the count"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path for the count"
+        },
+        "asset": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "production": {
+          "type": "object",
+          "required": ["id", "name", "description"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Production run identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Production run name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Production run description"
+            }
+          }
+        },
+        "product": {
+          "type": "object",
+          "required": ["id", "name", "description"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Product identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Product name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Product description"
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": ["timestamp", "value", "unit", "type", "metadata"]
+}

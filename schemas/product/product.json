@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/product.json",
+  "title": "Product Schema",
+  "description": "Schema for product information",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of the product event"
+    },
+    "id": {
+      "type": "number",
+      "description": "Product identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Product name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Product description"
+    },
+    "idealCycleTime": {
+      "type": "number",
+      "description": "Target cycle time in seconds",
+      "minimum": 0
+    },
+    "tolerance": {
+      "type": "number",
+      "description": "Allowed variance (0-1)",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure",
+      "default": "each"
+    },
+    "family": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Product family identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Product family name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Product family description"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system or service that generated the product event"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path for the product"
+        },
+        "asset": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": ["timestamp", "id", "name", "description", "family", "metadata"]
+}

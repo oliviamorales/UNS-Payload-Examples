@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/value.json",
+  "title": "Value Schema",
+  "description": "Schema for simple value information in the Abelara MES system",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["timestamp", "value", "unit", "metadata"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the value was recorded"
+    },
+    "value": {
+      "type": "number",
+      "description": "Numeric value"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path"
+        },
+        "asset": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

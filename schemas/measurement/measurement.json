@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/measurement.json",
+  "title": "Measurement Schema",
+  "description": "Schema for measurement information that correlates to the MeasurementLog table",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the measurement was taken (ISO 8601 with timezone)"
+    },
+    "type": {
+      "type": "object",
+      "required": ["id", "name", "description"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Measurement type identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Measurement type name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Measurement type description"
+        }
+      }
+    },
+    "value": {
+      "type": "number",
+      "description": "The actual measurement value"
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure"
+    },
+    "target": {
+      "type": "number",
+      "description": "Target value for the measurement"
+    },
+    "tolerance": {
+      "type": "number",
+      "description": "Tolerance value for the measurement"
+    },
+    "inTolerance": {
+      "type": "boolean",
+      "description": "Whether the measurement is within tolerance"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system or service that generated the measurement"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path/identifier"
+        },
+        "asset": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    },
+    "product": {
+      "type": "object",
+      "required": ["id", "name", "family"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Product identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Product name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Product description"
+        },
+        "family": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Product family identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Product family name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Product family description"
+            }
+          }
+        }
+      }
+    },
+    "productionContext": {
+      "type": "object",
+      "description": "Production context information",
+      "additionalProperties": true
+    }
+  },
+  "required": ["timestamp", "type", "value", "unit", "metadata"]
+}

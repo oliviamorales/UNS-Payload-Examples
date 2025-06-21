@@ -1,0 +1,3 @@
+Sample industrial MQTT payload schemas and examples for learning Unified Namespace (UNS) concepts. Educational JSON Schema patterns with working Python examples - not a standard or comprehensive specification.
+
+Topics: mqtt, industrial-iot, industry-4-0, json-schema, unified-namespace, manufacturing, iiot, edge-computing, data-validation, python, schemas, automation, examples, educational, samples 

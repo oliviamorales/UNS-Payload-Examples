@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/alert.json",
+  "title": "Alert Schema",
+  "description": "Schema for system alerts and notifications",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when the alert occurred"
+    },
+    "severity": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Alert severity level (1=Info, 2=Warning, 3=Error, 4=Critical, 5=Fatal)"
+    },
+    "code": {
+      "type": "string",
+      "description": "Alert code for categorization"
+    },
+    "message": {
+      "type": "string",
+      "description": "Human-readable alert message"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system or service that generated the alert"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path that triggered the alert"
+        },
+        "asset": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "acknowledgment": {
+          "type": "object",
+          "description": "Alert acknowledgment information",
+          "properties": {
+            "acknowledged": {
+              "type": "boolean",
+              "description": "Whether the alert has been acknowledged"
+            },
+            "acknowledgedBy": {
+              "type": ["string", "null"],
+              "description": "Username or identifier of who acknowledged the alert"
+            },
+            "acknowledgedAt": {
+              "type": ["string", "null"],
+              "format": "date-time",
+              "description": "ISO 8601 timestamp of when the alert was acknowledged"
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": ["timestamp", "severity", "code", "message", "metadata"]
+}

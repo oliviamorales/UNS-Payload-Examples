@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/asset.json",
+  "title": "Asset Schema",
+  "description": "Schema for asset information and configuration",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the asset information was recorded (ISO 8601 with timezone)"
+    },
+    "id": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Asset identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Asset name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed asset description"
+    },
+    "assetType": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Asset type identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Asset type name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Asset type description"
+        }
+      }
+    },
+    "parentAsset": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Parent asset identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Parent asset name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Parent asset description"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system or service that generated the asset information"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path/identifier"
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": ["timestamp", "id", "name", "description", "assetType", "metadata"]
+} 

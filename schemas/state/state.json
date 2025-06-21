@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/state.json",
+  "title": "State Schema",
+  "description": "Schema for state information",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the state was recorded (ISO 8601)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed state description"
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "Visual color code (hex format, e.g., #00FF00)"
+    },
+    "type": {
+      "type": "object",
+      "required": ["id", "name", "description"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Type identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Type name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Type description"
+        }
+      }
+    },
+    "downtimeReason": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "number",
+          "description": "Downtime reason identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Downtime reason name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Downtime reason description"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source system or service"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Data source path/identifier"
+        },
+        "asset": {
+          "type": "object",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "previousState": {
+          "type": "object",
+          "required": ["id", "name", "type"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Previous state identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Previous state name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Previous state description"
+            },
+            "color": {
+              "type": "string",
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "description": "Previous state color code (hex format)"
+            },
+            "type": {
+              "type": "object",
+              "required": ["id", "name", "description"],
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Previous state type identifier"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Previous state type name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Previous state type description"
+                }
+              }
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": ["timestamp", "description", "color", "type", "metadata"]
+}

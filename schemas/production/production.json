@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://abelara.com/schemas/base/production.json",
+  "title": "Production Schema",
+  "description": "Schema for production activity records",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp (log timestamp)"
+    },
+    "start_ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Production start timestamp"
+    },
+    "end_ts": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Production end timestamp"
+    },
+    "counts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Array of count entries",
+      "items": {
+        "type": "object",
+        "required": ["type", "quantity", "timestamp"],
+        "properties": {
+          "type": {
+            "type": "object",
+            "required": ["id", "name", "description", "unit"],
+            "properties": {
+              "id": {
+                "type": "number",
+                "description": "Count type identifier"
+              },
+              "name": {
+                "type": "string",
+                "description": "Count type name"
+              },
+              "description": {
+                "type": "string",
+                "description": "Count type description"
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit of measure for the count"
+              }
+            }
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Count amount"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When count was recorded (ISO 8601)"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Metadata for source, path, and asset context",
+      "required": ["source", "uri", "asset"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source of the message"
+        },
+        "uri": {
+          "type": "string",
+          "description": "Full path to data source (e.g., production order or system)"
+        },
+        "asset": {
+          "type": "object",
+          "description": "Structured asset reference",
+          "required": ["id", "name"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Asset identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Human-readable asset name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Asset description"
+            }
+          }
+        },
+        "product": {
+          "type": "object",
+          "required": ["id", "name", "family"],
+          "properties": {
+            "id": {
+              "type": "number",
+              "description": "Product identifier"
+            },
+            "name": {
+              "type": "string",
+              "description": "Product name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Product description"
+            },
+            "family": {
+              "type": "object",
+              "required": ["id", "name"],
+              "properties": {
+                "id": {
+                  "type": "number",
+                  "description": "Product family identifier"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Product family name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Product family description"
+                }
+              }
+            },
+            "idealCycleTime": {
+              "type": "number",
+              "description": "Target ideal cycle time in seconds"
+            },
+            "tolerance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Allowed variance (0-1)"
+            },
+            "unit": {
+              "type": "string",
+              "description": "Unit of measure (default: each)",
+              "default": "each"
+            }
+          }
+        },
+        "additionalInfo": {
+          "type": "object",
+          "description": "Additional edge-driven metadata",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "required": ["timestamp", "start_ts", "end_ts", "counts", "metadata"]
+}
