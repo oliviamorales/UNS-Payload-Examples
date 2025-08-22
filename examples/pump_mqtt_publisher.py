@@ -39,15 +39,39 @@ MQTT_KEEPALIVE = int(os.getenv("MQTT_KEEPALIVE", "60"))
 MQTT_QOS = int(os.getenv("MQTT_QOS", "1"))
 
 # MQTT Topic Configuration
-MQTT_BASE_TOPIC = os.getenv("MQTT_BASE_TOPIC", "abelara/plant1/utilities/water-system/pump-station/pump-101")
-MQTT_TOPIC_PREFIX = os.getenv("MQTT_TOPIC_PREFIX", "abelara")
+MQTT_TOPIC_ENTERPRISE = os.getenv("MQTT_TOPIC_ENTERPRISE", "abelara")
+MQTT_TOPIC_SITE = os.getenv("MQTT_TOPIC_SITE", "plant1")
+MQTT_TOPIC_AREA = os.getenv("MQTT_TOPIC_AREA", "utilities")
+MQTT_TOPIC_LINE = os.getenv("MQTT_TOPIC_LINE", "water-system")
+MQTT_TOPIC_CELL = os.getenv("MQTT_TOPIC_CELL", "pump-station")
 
 # Asset Configuration
-PUMP_ID = int(os.getenv("ASSET_ID", "101"))
-PUMP_NAME = os.getenv("ASSET_NAME", "Pump-101")
-PUMP_DESCRIPTION = os.getenv("ASSET_DESCRIPTION", "Centrifugal water pump for cooling system")
-PARENT_ASSET_ID = 22
-PARENT_ASSET_NAME = "Pump Station 1"
+"""
+Asset Configuration for multiple pumps
+"""
+PUMPS = [
+    {
+        "id": 101,
+        "name": "Pump-101",
+        "description": "Centrifugal water pump for cooling system",
+        "parent_id": 22,
+        "parent_name": "Pump Station 1"
+    },
+    {
+        "id": 102,
+        "name": "Pump-102",
+        "description": "Centrifugal water pump for cooling system",
+        "parent_id": 22,
+        "parent_name": "Pump Station 1"
+    },
+    {
+        "id": 103,
+        "name": "Pump-103",
+        "description": "Centrifugal water pump for cooling system",
+        "parent_id": 22,
+        "parent_name": "Pump Station 1"
+    }
+]
 
 # Publisher Configuration
 PUBLISH_INTERVAL = int(os.getenv("PUBLISH_INTERVAL", "5"))
@@ -195,30 +219,30 @@ def add_variation(base_value, variation_percent=3):
 # SCHEMA PAYLOADS
 # =============================================================================
 
-def create_asset_payload():
-    """Create Asset schema payload"""
+def create_asset_payload(pump):
+    """Create Asset schema payload for a given pump"""
     return {
         "timestamp": get_timestamp(),
-        "id": PUMP_ID,
-        "name": PUMP_NAME,
-        "description": PUMP_DESCRIPTION,
+        "id": pump["id"],
+        "name": pump["name"],
+        "description": pump["description"],
         "assetType": {
             "id": 1,
             "name": "Centrifugal Pump",
             "description": "Centrifugal pump equipment"
         },
         "parentAsset": {
-            "id": PARENT_ASSET_ID,
-            "name": PARENT_ASSET_NAME,
+            "id": pump["parent_id"],
+            "name": pump["parent_name"],
             "description": "Primary water pump station"
         },
         "metadata": {
             "source": "asset-management",
-            "uri": f"asset://{PUMP_ID}",
+            "uri": f"asset://{pump['id']}",
             "additionalInfo": {
                 "manufacturer": "Grundfos",
                 "model": "CR45-4",
-                "serialNumber": "GF-2023-001234",
+                "serialNumber": f"GF-2023-00{pump['id']}",
                 "installationDate": "2023-03-15",
                 "powerRating": "5.5 kW",
                 "maxFlow": "45 m³/h",
@@ -228,8 +252,8 @@ def create_asset_payload():
         }
     }
 
-def create_state_payload():
-    """Create State schema payload"""
+def create_state_payload(pump):
+    """Create State schema payload for a given pump"""
     states = [
         {"id": 1, "name": "Running", "description": "Equipment is operating normally", "color": "#00FF00"},
         {"id": 2, "name": "Starting", "description": "Equipment startup sequence", "color": "#FFFF00"},
@@ -237,10 +261,8 @@ def create_state_payload():
         {"id": 4, "name": "Fault", "description": "Equipment fault condition", "color": "#FF0000"},
         {"id": 5, "name": "Maintenance", "description": "Equipment under maintenance", "color": "#800080"}
     ]
-    
     current_state = random.choice(states)
     previous_state = random.choice([s for s in states if s["id"] != current_state["id"]])
-    
     return {
         "timestamp": get_timestamp(),
         "description": f"Pump is {current_state['name'].lower()}",
@@ -254,9 +276,9 @@ def create_state_payload():
             "source": "plc-controller",
             "uri": "opc://plc1/DB1.DBW0",
             "asset": {
-                "id": PUMP_ID,
-                "name": PUMP_NAME,
-                "description": PUMP_DESCRIPTION
+                "id": pump["id"],
+                "name": pump["name"],
+                "description": pump["description"]
             },
             "previousState": {
                 "id": previous_state["id"],
@@ -278,7 +300,7 @@ def create_state_payload():
         }
     }
 
-def create_measurement_payloads():
+def create_measurement_payloads(pump):
     """Create multiple Measurement schema payloads for precision maintenance and operator rounds"""
     measurement_types = [
         {"id": 1, "name": "Bearing Temperature", "description": "Precision bearing temperature measurement", "unit": "°C", "base_value": 72.5, "target": 70.0, "topic_suffix": "bearing-temperature", "location": "Drive End Bearing"},
@@ -308,11 +330,11 @@ def create_measurement_payloads():
             "inTolerance": in_tolerance,
             "metadata": {
                 "source": "precision-maintenance",
-                "uri": f"maintenance://{PUMP_NAME.lower()}/{measurement['name'].lower().replace(' ', '-')}",
+                "uri": f"maintenance://{pump['name'].lower()}/{measurement['name'].lower().replace(' ', '-')}",
                 "asset": {
-                    "id": PUMP_ID,
-                    "name": PUMP_NAME,
-                    "description": PUMP_DESCRIPTION
+                    "id": pump["id"],
+                    "name": pump["name"],
+                    "description": pump["description"]
                 },
                 "additionalInfo": {
                     "technician": random.choice(["John Smith", "Jane Doe", "Bob Wilson", "Mike Johnson", "Sarah Davis"]),
@@ -345,7 +367,7 @@ def create_measurement_payloads():
     
     return payloads
 
-def create_edge_payloads():
+def create_edge_payloads(pump):
     """Create multiple Edge schema payloads for different process readings"""
     edge_types = [
         {"id": 1, "name": "Temperature", "description": "Temperature readings from process equipment", "unit": "°C", "base_value": 72.5, "topic_suffix": "temperature", "location": "Drive End Bearing"},
@@ -374,12 +396,12 @@ def create_edge_payloads():
                 "source": f"{edge_type['name'].lower()}-sensor",
                 "uri": f"opc://plc1/DB1.DBD{random.randint(12, 30)}",
                 "asset": {
-                    "id": PUMP_ID,
-                    "name": PUMP_NAME,
-                    "description": PUMP_DESCRIPTION
+                    "id": pump["id"],
+                    "name": pump["name"],
+                    "description": pump["description"]
                 },
                 "additionalInfo": {
-                    "sensorId": f"{edge_type['name'].upper().replace(' ', '')}-{PUMP_ID:03d}",
+                    "sensorId": f"{edge_type['name'].upper().replace(' ', '')}-{pump['id']:03d}",
                     "location": edge_type["location"],
                     "alarmThreshold": edge_type["base_value"] * 1.2,
                     "warningThreshold": edge_type["base_value"] * 1.1,
@@ -393,7 +415,7 @@ def create_edge_payloads():
     
     return payloads
 
-def create_count_payloads():
+def create_count_payloads(pump):
     """Create multiple Count schema payloads for different accumulated values"""
     count_types = [
         {"id": 1, "name": "Gallons Delivered", "description": "Total gallons delivered to cooling system", "unit": "gallons", "base_value": 125000, "topic_suffix": "gallons-delivered", "increment": lambda: random.randint(80, 120)},
@@ -421,9 +443,9 @@ def create_count_payloads():
                 "source": "flow-counter",
                 "uri": "opc://plc1/DB1.DBD16",
                 "asset": {
-                    "id": PUMP_ID,
-                    "name": PUMP_NAME,
-                    "description": PUMP_DESCRIPTION
+                    "id": pump["id"],
+                    "name": pump["name"],
+                    "description": pump["description"]
                 },
                 "production": {
                     "id": random.randint(1000, 9999),
@@ -453,7 +475,7 @@ def create_count_payloads():
     
     return payloads
 
-def create_kpi_payloads():
+def create_kpi_payloads(pump):
     """Create multiple KPI schema payloads for different performance metrics"""
     kpi_types = [
         {"id": 1, "name": "Pump Efficiency", "description": "Overall pump efficiency", "unit": "%", "base_value": 96.5, "topic_suffix": "efficiency"},
@@ -496,10 +518,10 @@ def create_kpi_payloads():
             },
             "metadata": {
                 "source": "kpi-calculator",
-                "uri": f"kpi://{PUMP_NAME.lower()}/{kpi_type['name'].lower().replace(' ', '-')}",
+                "uri": f"kpi://{pump['name'].lower()}/{kpi_type['name'].lower().replace(' ', '-')}",
                 "asset": {
-                    "id": PUMP_ID,
-                    "name": PUMP_NAME
+                    "id": pump["id"],
+                    "name": pump["name"]
                 },
                 "additionalInfo": {
                     "calculationPeriod": "1 hour",
@@ -541,10 +563,10 @@ def create_kpi_payloads():
             },
             "metadata": {
                 "source": "oee-calculator",
-                "uri": f"oee://{PUMP_NAME.lower()}/{oee_component['name'].lower().replace(' ', '-')}",
+                "uri": f"oee://{pump['name'].lower()}/{oee_component['name'].lower().replace(' ', '-')}",
                 "asset": {
-                    "id": PUMP_ID,
-                    "name": PUMP_NAME
+                    "id": pump["id"],
+                    "name": pump["name"]
                 },
                 "additionalInfo": {
                     "calculationPeriod": "1 hour",
@@ -566,7 +588,7 @@ def create_kpi_payloads():
     
     return payloads
 
-def create_alert_payload():
+def create_alert_payload(pump):
     """Create Alert schema payload"""
     alert_types = [
         {"severity": 2, "code": "TEMP_WARN", "message": "Pump bearing temperature approaching warning threshold"},
@@ -596,9 +618,9 @@ def create_alert_payload():
             "source": "monitoring-system",
             "uri": "opc://plc1/DB1.DBD4",
             "asset": {
-                "id": PUMP_ID,
-                "name": PUMP_NAME,
-                "description": PUMP_DESCRIPTION
+                "id": pump["id"],
+                "name": pump["name"],
+                "description": pump["description"]
             },
             "acknowledgment": acknowledgment,
             "additionalInfo": {
@@ -614,7 +636,7 @@ def create_alert_payload():
         }
     }
 
-def create_product_payload():
+def create_product_payload(pump):
     """Create Product schema payload"""
     return {
         "timestamp": get_timestamp(),
@@ -633,9 +655,9 @@ def create_product_payload():
             "source": "product-management",
             "uri": "product://cooling-water",
             "asset": {
-                "id": PUMP_ID,
-                "name": PUMP_NAME,
-                "description": PUMP_DESCRIPTION
+                "id": pump["id"],
+                "name": pump["name"],
+                "description": pump["description"]
             },
             "additionalInfo": {
                 "specifications": {
@@ -649,7 +671,7 @@ def create_product_payload():
         }
     }
 
-def create_production_payload():
+def create_production_payload(pump):
     """Create Production schema payload"""
     water_delivered = random.randint(320, 380)  # More realistic range
     runtime_hours = random.uniform(6.5, 7.5)    # More realistic runtime
@@ -684,9 +706,9 @@ def create_production_payload():
             "source": "production-tracker",
             "uri": f"production://cooling-system-2024-{random.randint(1, 999):03d}",
             "asset": {
-                "id": PUMP_ID,
-                "name": PUMP_NAME,
-                "description": PUMP_DESCRIPTION
+                "id": pump["id"],
+                "name": pump["name"],
+                "description": pump["description"]
             },
             "product": {
                 "id": 1,
@@ -759,70 +781,49 @@ def publish_pump_data():
     if MQTT_USE_TLS:
         client.tls_set()
     
-    # Create base topic
-    base_topic = MQTT_BASE_TOPIC.replace("pump-101", PUMP_NAME.lower())
-    
     try:
-        # Connect to broker
         client.connect(BROKER_ADDRESS, BROKER_PORT, MQTT_KEEPALIVE)
-        
-        # Start the loop
         client.loop_start()
-        
-        # Wait for connection
         time.sleep(2)
-        
         cycle = 0
         while True:
             cycle += 1
             print(f"\n🔄 Cycle {cycle} - {datetime.now().strftime('%H:%M:%S')}")
-            
-            # Publish data for each schema type
-            for schema_type, (description, payload_func) in SCHEMA_PAYLOADS.items():
-                print(f"📤 Publishing {schema_type.upper()} payload...")
-                
-                try:
-                    if schema_type == "value":
-                        # Multiple value payloads
-                        for value_type, (value_description, value_payload_func) in VALUE_PAYLOADS.items():
-                            print(f"  📊 {value_description}...")
-                            value_payloads = value_payload_func()
-                            for topic_suffix, value_payload, value_desc in value_payloads:
-                                # Create topic
-                                topic = f"{base_topic}/{value_type}/{topic_suffix}"
-                                
-                                # Validate and publish payload
-                                if publish_payload(client, topic, value_payload):
-                                    print(f"    ✅ {value_desc:20} → {topic}")
-                                else:
-                                    print(f"    ❌ {value_desc:20} → Validation failed")
-                    else:
-                        # Single payload for other schemas
-                        payload = payload_func()
-                        # Create topic
-                        topic = f"{base_topic}/{schema_type}"
-                        
-                        # Validate and publish payload
-                        if publish_payload(client, topic, payload):
-                            print(f"  ✅ {description:20} → {topic}")
+            for pump in PUMPS:
+                print(f"\n🚰 Publishing for {pump['name']} (ID: {pump['id']})")
+                # Build base topic dynamically using UNS structure language
+                base_topic = f"{MQTT_TOPIC_ENTERPRISE}/{MQTT_TOPIC_SITE}/{MQTT_TOPIC_AREA}/{MQTT_TOPIC_LINE}/{MQTT_TOPIC_CELL}/{pump['name'].lower()}"
+                for schema_type, (description, payload_func) in SCHEMA_PAYLOADS.items():
+                    print(f"📤 Publishing {schema_type.upper()} payload...")
+                    try:
+                        if schema_type == "value":
+                            for value_type, (value_description, value_payload_func) in VALUE_PAYLOADS.items():
+                                print(f"  📊 {value_description}...")
+                                value_payloads = value_payload_func(pump)
+                                for topic_suffix, value_payload, value_desc in value_payloads:
+                                    topic = f"{base_topic}/{value_type}/{topic_suffix}"
+                                    if publish_payload(client, topic, value_payload):
+                                        print(f"    ✅ {value_desc:20} → {topic}")
+                                    else:
+                                        print(f"    ❌ {value_desc:20} → Validation failed")
                         else:
-                            print(f"  ❌ {description:20} → Validation failed")
-                        
-                except Exception as e:
-                    logger.error(f"Error publishing {schema_type}: {e}")
-                    print(f"  ❌ {description:20} → Error: {e}")
-            
+                            payload = payload_func(pump)
+                            topic = f"{base_topic}/{schema_type}"
+                            if publish_payload(client, topic, payload):
+                                print(f"  ✅ {description:20} → {topic}")
+                            else:
+                                print(f"  ❌ {description:20} → Validation failed")
+                    except Exception as e:
+                        logger.error(f"Error publishing {schema_type}: {e}")
+                        print(f"  ❌ {description:20} → Error: {e}")
             print(f"⏳ Waiting {PUBLISH_INTERVAL} seconds until next cycle...")
             time.sleep(PUBLISH_INTERVAL)
-        
     except KeyboardInterrupt:
         print(f"\n🛑 Stopping pump MQTT publisher...")
     except Exception as e:
         logger.error(f"Connection error: {e}")
         print(f"❌ Connection failed: {e}")
-    
     finally:
-        # Stop the loop and disconnect
         client.loop_stop()
         client.disconnect()
         print("👋 Disconnected from MQTT broker")
@@ -918,12 +919,13 @@ if __name__ == "__main__":
     # Show configuration
     print(f"\n⚙️  Configuration:")
     print(f"   📡 Broker: {BROKER_ADDRESS}:{BROKER_PORT}")
-    print(f"   🏭 Pump: {PUMP_NAME} (ID: {PUMP_ID})")
+    print(f"   🏭 Pumps:")
+    for pump in PUMPS:
+        print(f"      - {pump['name']} (ID: {pump['id']})")
     print(f"   ⏱️  Interval: {PUBLISH_INTERVAL} seconds")
     print(f"   🔄 Random variation: {'Enabled' if ENABLE_RANDOM_VARIATION else 'Disabled'}")
     print(f"   🔐 Authentication: {'Enabled' if MQTT_USE_AUTH else 'Disabled'}")
     print(f"   🔒 TLS: {'Enabled' if MQTT_USE_TLS else 'Disabled'}")
     print(f"   📝 Log Level: {LOG_LEVEL}")
-    
     print("\n🔗 Connecting to MQTT broker...")
-    publish_pump_data() 
+    publish_pump_data()
